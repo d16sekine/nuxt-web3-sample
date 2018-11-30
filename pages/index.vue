@@ -27,7 +27,7 @@ export default {
 
     const tokenAddress = "0x6dc9d424b5514f249c73093295917440a1614474";
 
-    const MyToken = await fetch("./assets/token/MyToken.json")
+    const MyToken = await fetch("./static/token/MyToken.json")
     .then((res) => {
         return res.json();
     })
