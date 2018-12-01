@@ -27,10 +27,7 @@ export default {
 
     const tokenAddress = "0x6dc9d424b5514f249c73093295917440a1614474";
 
-    const MyToken = await fetch("./static/token/MyToken.json")
-    .then((res) => {
-        return res.json();
-    })
+    const MyToken = require("/static/token/MyToken.json")
 
     const web3 = new Web3('http://localhost:8545');
     let myContract =  await new web3.eth.Contract(MyToken.abi, tokenAddress);
