@@ -1,41 +1,52 @@
 <template>
-  <section class="container">
-    <div>
-      <app-logo/>
-      <h1 class="title">
-        xds-app
-      </h1>
-      <h2 class="subtitle">
-        Nuxt.js project
-      </h2>
-      <div class="links">
-      
-      </div>
-    </div>
-  </section>
+ 
+
+  <el-container>
+  <el-header>
+    <h2 class="title">xds-app</h2>
+  </el-header>
+  <el-main>
+    <p>Coinbase Address</p>
+    <el-input placeholder=""  v-model="coinbase"  :disabled="true"></el-input>
+    <p>Token Contract Address</p>
+    <el-input placeholder=""  v-model="tokenContract"  :disabled="true"></el-input>
+    <p>Total supply XDS</p>
+    <el-input placeholder=""  v-model="totalSupply"  :disabled="true"></el-input>
+  </el-main>
+  </el-container> 
+     
 </template>
 
 <script>
-import AppLogo from '~/components/AppLogo.vue'
 import Web3 from 'web3'
 
 export default {
-  components: {
-    AppLogo
-  },
-  asyncData(){
-    const MyToken = require("~/static/token/MyToken.json")
-    console.log("MyToken.json:", MyToken)
+  data () {
     return {
-      myToken: require("~/static/token/MyToken.json")
-      // const tokenAddress = "0x6dc9d424b5514f249c73093295917440a1614474";
+      input: null
+    }
+  },
 
-      // const MyToken = 
+  async asyncData(){
 
-      // const web3 = new Web3('http://localhost:8545');
-      // let myContract =  await new web3.eth.Contract(MyToken.abi, tokenAddress);
-      // let totalSupply = await myContract.methods.totalSupply().call();
-      // console.log("totalSupply:", totalSupply);
+    const MyToken = require("~/static/token/MyToken.json")
+    //console.log("MyToken.json:", MyToken)
+
+    const tokenAddress = "0x6dc9d424b5514f249c73093295917440a1614474";
+
+    const web3 = new Web3('http://localhost:8545');
+
+    //coinbase
+    let addr_coinbase =  await web3.eth.getCoinbase();
+
+    let myContract =  await new web3.eth.Contract(MyToken.abi, tokenAddress);
+    let totalSupply = await myContract.methods.totalSupply().call();
+    console.log("totalSupply:", totalSupply);
+
+    return {
+      coinbase: addr_coinbase,
+      tokenContract: tokenAddress,
+      totalSupply: totalSupply    
 
     }
   }
@@ -60,7 +71,7 @@ export default {
   letter-spacing: 1px;
 }
 
-.subtitle {
+.title {
   font-weight: 300;
   font-size: 42px;
   color: #526488;
