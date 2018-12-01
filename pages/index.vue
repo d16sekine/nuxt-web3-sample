@@ -17,7 +17,7 @@
     <p>Target Address</p>
     <el-input v-model="targetAddress" placeholder="Please input XDS Address"></el-input>
     <p>{{balance}}</P>
-     <el-button @click="getAmount" type="primary">GET Balance</el-button>
+     <el-button @click="getAmount" type="primary">GET XDS Balance</el-button>
     <hr />
      <p>Sender Address</p>
     <el-input v-model="addrSender" placeholder="Please input XDS Address"></el-input>
@@ -30,6 +30,15 @@
     <el-input v-model="passwordSender" placeholder="Please Your Password"></el-input>
     <el-button @click="transferFromXDS" type="primary">SEND(transferFrom)</el-button>
     <el-button @click="transferXDS" type="primary">SEND(transfer)</el-button> 
+
+    <hr />
+    <p>Owner Address</p>
+    <el-input v-model="addrOwner" placeholder="Please input XDS Address"></el-input>
+    <p>Spender Address</p>
+    <el-input v-model="addrSpender" placeholder="Please input XDS Address"></el-input>
+    <el-button @click="allowanceXDS" type="primary">Allowance</el-button> 
+    <el-button @click="approveXDS" type="primary">Approve</el-button>
+
   </el-main>
   </el-container> 
      
@@ -61,7 +70,9 @@ export default {
       addrReceiver: "0xa4a717ab24c148428180ae28a8947802c6ddfe71", //一時的に
       amountTransfer: 2,
       passwordSender: "",
-      targetAddress: ""
+      targetAddress: "",
+      addrSpender: "",
+      addrOwner: ""
     }
   },
 
@@ -75,21 +86,23 @@ export default {
 
       let myContract =  await new web3.eth.Contract(MyToken.abi, tokenAddress);
       console.log("targetAddress:", this.targetAddress);
-      let balance = await myContract.methods.balanceOf(this.targetAddress).call();
-      console.log("balance of XDS:", balance);
-      this.$store.commit('setAmountToStore', balance);
+      let balanceXDS = await myContract.methods.balanceOf(this.targetAddress).call();
+      let balanceETH = await web3.eth.getBalance(this.targetAddress);
+      console.log("balance of XDS:", balanceXDS);
+      console.log("balance of ETH:", balanceETH);
+      this.$store.commit('setAmountToStore', balanceXDS);
     },
 
     async transferFromXDS(){
 
       let myContract =  await new web3.eth.Contract(MyToken.abi, tokenAddress);
 
-      await web3.eth.personal.unlockAccount(this.addrSender, this.passwordSender, 1000);
+      await web3.eth.personal.unlockAccount(this.addrCoinbase, this.passwordCoinbase, 1000);
 
-      let transfer = await myContract.methods.transferFrom(this.addrSender, this.addrReceiver, this.amountTransfer)
-      .send({from: this.addrSender});
+      let transferFrom = await myContract.methods.transferFrom(this.addrSender, this.addrReceiver, this.amountTransfer)
+      .send({from: this.addrCoinbase});
     
-      console.log("transfer:", transfer);
+      console.log("transferFrom:", transferFrom);
     },
 
     async transferXDS(){
@@ -98,13 +111,57 @@ export default {
 
       let myContract =  await new web3.eth.Contract(MyToken.abi, tokenAddress);
 
-      await web3.eth.personal.unlockAccount(this.addrCoinbase, this.coinbasePassword, 1000);
 
+      let estimatedGas = await myContract.methods.transfer(this.addrReceiver, this.amountTransfer).estimateGas();
+
+      console.log("estimatedGas:",estimatedGas);
+
+      if(this.addrSender != this.addrCoinbase){
+
+        //gas代をcoinbaseから取得
+        let valueEthWei = estimatedGas * 10000000000;
+
+        await web3.eth.personal.unlockAccount(this.addrCoinbase, coinbasePassword, 1000);
+        let result_eth = await web3.eth.sendTransaction({from: this.addrCoinbase, to: this.addrSender, value: valueEthWei});
+
+        console.log("result_eth:", result_eth);
+
+      }
+
+      await web3.eth.personal.unlockAccount(this.addrSender, this.passwordSender, 1000);
       let transfer = await myContract.methods.transfer(this.addrReceiver, this.amountTransfer)
-      .send({from: this.addrCoinbase});
+      .send({from: this.addrSender});
     
       console.log("transfer:", transfer);
-    }
+
+      return;
+    },
+
+    async allowanceXDS(){
+
+      let myContract =  await new web3.eth.Contract(MyToken.abi, tokenAddress);
+
+      let allowance = await myContract.methods.allowance(this.addrOwner, this.addrSpender).call();
+    
+      console.log("allowance:", allowance);
+    },
+
+    async approveXDS(){
+
+      let coinbasePassword = "";
+
+      let myContract =  await new web3.eth.Contract(MyToken.abi, tokenAddress);
+
+      await web3.eth.personal.unlockAccount(this.addrCoinbase, this.coinbasePassword, 1000);
+
+      let approve = await myContract.methods.approve(this.addrSpender, this.amountTransfer)
+      .send({from: this.addrCoinbase});
+    
+      console.log("approve:", approve);
+    },
+
+    
+  
   },
 
   computed: {

@@ -10,7 +10,6 @@ const walletStore = () => {
     }),
     mutations: {
       setAmountToStore(state, value) {
-        console.log("mutations");
         state.wallet.amount = value;
       }
     },
