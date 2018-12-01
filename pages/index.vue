@@ -23,17 +23,21 @@ export default {
   components: {
     AppLogo
   },
-  async mounted(){
+  asyncData(){
+    const MyToken = require("~/static/token/MyToken.json")
+    console.log("MyToken.json:", MyToken)
+    return {
+      myToken: require("~/static/token/MyToken.json")
+      // const tokenAddress = "0x6dc9d424b5514f249c73093295917440a1614474";
 
-    const tokenAddress = "0x6dc9d424b5514f249c73093295917440a1614474";
+      // const MyToken = 
 
-    const MyToken = require("/static/token/MyToken.json")
+      // const web3 = new Web3('http://localhost:8545');
+      // let myContract =  await new web3.eth.Contract(MyToken.abi, tokenAddress);
+      // let totalSupply = await myContract.methods.totalSupply().call();
+      // console.log("totalSupply:", totalSupply);
 
-    const web3 = new Web3('http://localhost:8545');
-    let myContract =  await new web3.eth.Contract(MyToken.abi, tokenAddress);
-    let totalSupply = await myContract.methods.totalSupply().call();
-    console.log("totalSupply:", totalSupply);
-
+    }
   }
 }
 </script>
