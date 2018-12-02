@@ -3,7 +3,7 @@
 
   <el-container>
   <el-header>
-    <h2 class="title">XDS-wallet-app</h2>
+    <h2 class="title">XDS-Wallet-App</h2>
   </el-header>
   <el-main>
     <p>Token Contract Address</p>
@@ -13,16 +13,18 @@
     {{totalSupply}} XDS
     <hr />
     <p>Your XDS Address</p>
-    <p>{{address}}</P>
-    <el-button @click="createQRCode" type="primary">QRコード</el-button> 
-    <p>{{balance}}</P>
+    <p>{{wallet.address}}</P>
+    <p>Your XDS Amount</p>
+    <p>{{wallet.balance}}</P>
      <el-button @click="getAmount" type="primary">GET XDS Balance</el-button>
     <hr />
     <p>XDS amount</p>
     <el-input v-model="amountTransfer" placeholder="Please input XDS Amount"></el-input>
     <p>Receiver Address</p>
+    <div>
     <el-input v-model="addrReceiver" placeholder="Please input XDS Address"></el-input>
-  
+    <el-button @click="handleQRCodeReader" type="primary">{{textButtonQRCodeReader}}</el-button>
+    </div>
     <p>Your Password</p>
     <el-input v-model="passwordSender" placeholder="Please Your Password"></el-input>
     <el-button @click="transferXDS" type="primary">SEND XDS</el-button> 
@@ -30,7 +32,7 @@
     <vue-q-art :config=config></vue-q-art>
   </div>
   <div class="qrReader">
-    <qrcode-reader :paused="paused" @init="onInit" @decode="onDecode"></qrcode-reader>
+    <qrcode-reader :paused="paused" @init="onInit" @decode="onDecode" v-if="!destroyed"></qrcode-reader>
   </div>
   </el-main>
   </el-container> 
@@ -55,7 +57,8 @@ export default {
 
   data () {
       return {
-        paused: false
+        paused: false,
+        destroyed: true
       }
     },
    
@@ -89,6 +92,7 @@ export default {
       addrReceiver: "",
       amountTransfer: 2,
       passwordSender: "",
+      textButtonQRCodeReader:"QR Code Reader:ON",
       config: {
         // valueにはinput v-modelにて動的に入力した値が設定されるため空文字を設定
         value: yourAddress, 
@@ -139,12 +143,18 @@ export default {
 
       return;
     },
-    async createQRCode(){
+    async handleQRCodeReader(){
+      if(this.destroyed){
+        this.destroyed = false
+        this.textButtonQRCodeReader = "QR Code Reader:OFF"
+      }else{
+        this.destroyed =  true
+        this.textButtonQRCodeReader = "QR Code Reader:ON"
+      }
 
-      
       return;
     },
-
+    
     async onInit (promise) {
         // show loading indicator
         try {
@@ -168,19 +178,25 @@ export default {
           // hide loading indicator
         }
       },
-      onDecode(content){
+      onDecode(decodeString){
         this.paused = true
-        alert(content)
+        alert(decodeString)
+        this.addrReceiver = decodeString
+        //読み取ったらQRcode Readerを破棄する
+        this.destroyed = true
       }
   
   },
 
   computed: {
-    balance() {
-       return this.$store.state.wallet.amount
-    },
-    address(){
-       return this.$store.state.wallet.address
+    // balance() {
+    //    return this.$store.state.wallet.amount
+    // },
+    // address(){
+    //    return this.$store.state.wallet.address
+    // }
+    wallet: function(){
+     return this.$store.state.wallet
     }
   }
 
