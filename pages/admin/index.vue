@@ -48,7 +48,8 @@
 import Web3 from 'web3'
 const MyToken = require("~/static/token/MyToken.json")
 const tokenAddress = "0x6dc9d424b5514f249c73093295917440a1614474";
-const web3 = new Web3('http://localhost:8545');
+//const web3 = new Web3('http://localhost:8545');
+const web3 = new Web3('ws://127.0.0.1:8888');
 
 export default {
    

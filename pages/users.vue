@@ -50,6 +50,8 @@ const web3 = new Web3('ws://127.0.0.1:8888');
 
 export default {
 
+  middleware: 'auth-cookie',
+  
   components: {
     VueQArt,
     QrcodeReader

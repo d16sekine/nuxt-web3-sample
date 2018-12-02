@@ -17,10 +17,13 @@
 </template>
 
 <script>
+import Cookies from 'universal-cookie'
 import Web3 from 'web3'
 const web3 = new Web3('ws://127.0.0.1:8888');
 
 export default {
+
+   middleware: 'auth-cookie',
  
   async asyncData(context){
 
@@ -35,7 +38,7 @@ export default {
 
     async createNewAddress(){
 
-      console.log(this.newPassword);
+      console.log("inputed password:",this.newPassword);
 
       let address = "asdf";
 
@@ -43,7 +46,17 @@ export default {
 
       console.log("address:",address);
 
-      confirm(address);
+      if(confirm(address + 'をcookieに保存しますか？')){
+
+        const cookies = new Cookies();
+        cookies.set("address", address);
+
+      }
+      else{
+
+        alert('キャンセルされました'); // 警告ダイアログを表示
+
+      }
 
       this.$router.push("/users/")
       
