@@ -1,18 +1,16 @@
-import Cookies from 'universal-cookie'
+export default(context) => {
 
-export default({req, store}) => {
+    const cookieRes = context.app.$cookies.get('XDSInfo')
 
-    console.log("req:", req)
+    console.log("cookieRes:",cookieRes);
 
-    if(process.browser){
-        return;
+    if(!cookieRes){
+        context.redirect('/')
     }
-    const cookies = new Cookies(req.headers.cookie)
-    const address = cookies.get("address")
-    console.log("address in cookie", address)
-    if(address){
+
+    if(cookieRes.address){
         
-        store.commit("setAddressToStore", address)
+        context.store.commit("setAddressToStore", cookieRes.address)
     }
 
 }

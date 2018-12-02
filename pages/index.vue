@@ -17,17 +17,12 @@
 </template>
 
 <script>
-import Cookies from 'universal-cookie'
 import Web3 from 'web3'
 const web3 = new Web3('ws://127.0.0.1:8888');
 
 export default {
-
-   middleware: 'auth-cookie',
  
   async asyncData(context){
-
-    //cockieの有無の処理
 
     return {
       newPassword:""
@@ -40,16 +35,21 @@ export default {
 
       console.log("inputed password:",this.newPassword);
 
-      let address = "asdf";
+      let address =  await web3.eth.personal.newAccount(this.newPassword);
+      //let address = "test";
 
-      //address =  await web3.eth.personal.newAccount(this.newPassword);
-
-      console.log("address:",address);
+      console.log("created address:",address);
 
       if(confirm(address + 'をcookieに保存しますか？')){
 
-        const cookies = new Cookies();
-        cookies.set("address", address);
+        const cookieValObject = { address: address }
+
+        console.log(cookieValObject);
+
+        this.$cookies.set('XDSInfo', cookieValObject, {
+          path: '/',
+          maxAge: 60 * 60 * 24 * 365
+        })
 
       }
       else{
@@ -59,7 +59,7 @@ export default {
       }
 
       this.$router.push("/users/")
-      
+
       return;
 
     }

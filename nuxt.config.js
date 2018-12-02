@@ -1,4 +1,7 @@
 module.exports = {
+
+  mode: 'spa', //vue-qartがSSRに対応していないため
+
   /*
   ** Headers of the page
   */
@@ -13,11 +16,11 @@ module.exports = {
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
     ]
   },
-  mode: 'spa', //vue-qartがSSRに対応していないため
+  
   /*
   ** Customize the progress bar color
   */
-  loading: { color: '#3B8070' },
+  loading: { color: '#2196F3' },
 
 
   // router:{
@@ -50,6 +53,13 @@ module.exports = {
   ],
   css: [
     'element-ui/lib/theme-chalk/index.css'
-  ]
+  ],
+  modules: [
+    // Simple usage
+    'cookie-universal-nuxt',
+ 
+    // With options
+    ['cookie-universal-nuxt', { alias: 'cookiz' }],
+ ]
 }
 

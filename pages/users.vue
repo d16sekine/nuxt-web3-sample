@@ -6,14 +6,8 @@
     <h2 class="title">XDS-Wallet-App</h2>
   </el-header>
   <el-main>
-    <p>Token Contract Address</p>
-    <el-input placeholder=""  v-model="tokenContract"  :disabled="true"></el-input>
-    <hr />
-    <p>Total supply</p>
-    {{totalSupply}} XDS
-    <hr />
     <p>Your XDS Address</p>
-    <p>{{wallet.address}}</P>
+    <el-input placeholder=""  v-model="wallet.address"></el-input>
     <p>Your XDS Amount</p>
     <p>{{wallet.balance}}</P>
      <el-button @click="getAmount" type="primary">GET XDS Balance</el-button>
@@ -51,7 +45,7 @@ const web3 = new Web3('ws://127.0.0.1:8888');
 export default {
 
   middleware: 'auth-cookie',
-  
+
   components: {
     VueQArt,
     QrcodeReader
@@ -65,42 +59,16 @@ export default {
     },
    
   async asyncData(context){
-
-    //coinbase
-    let addrCoinbase = "";
-    let totalSupply = 0;
-    
-    //token info
-    let myContract =  await new web3.eth.Contract(MyToken.abi, tokenAddress);
-
-    try{
-      addrCoinbase =  await web3.eth.getCoinbase();
-      totalSupply = await myContract.methods.totalSupply().call();
-    }catch(err){
-      console.log("err:", err);
-    }
      
-    //console.log("totalSupply:", totalSupply);
+    let wallet = context.store.getters["wallet"];
 
-    let yourAddress = "0x1ac995f1e67ce3b0b66064b24669b26124db7e1e";
-
-    context.store.commit('setAddressToStore', yourAddress);
+    let yourAddress = wallet.address;
 
     return {
-      addrCoinbase: addrCoinbase,
-      tokenContract: tokenAddress,
-      totalSupply: totalSupply,
-      addrSender: addrCoinbase,
       addrReceiver: "",
       amountTransfer: 2,
       passwordSender: "",
-      textButtonQRCodeReader:"QR Code Reader:ON",
-      config: {
-        // valueにはinput v-modelにて動的に入力した値が設定されるため空文字を設定
-        value: yourAddress, 
-        imagePath: "/XDS195.png",
-        filter: "color",
-      }
+      textButtonQRCodeReader:"QR Code Reader:ON"
     }
   },
 
@@ -108,41 +76,48 @@ export default {
     async getAmount(){
 
       let myContract =  await new web3.eth.Contract(MyToken.abi, tokenAddress);
-      console.log("targetAddress:", this.address);
-      let balanceXDS = await myContract.methods.balanceOf(this.address).call();
-      let balanceETH = await web3.eth.getBalance(this.address);
+      console.log("targetAddress:", this.wallet.address);
+      let balanceXDS = await myContract.methods.balanceOf(this.wallet.address).call();
+      let balanceETH = await web3.eth.getBalance(this.wallet.address);
       console.log("balance of XDS:", balanceXDS);
       console.log("balance of ETH:", balanceETH);
-      this.$store.commit('setAmountToStore', balanceXDS);
+      this.$store.commit('setBalanceToStore', balanceXDS);
     },
 
     async transferXDS(){
 
       let coinbasePassword = "";
 
-      let myContract =  await new web3.eth.Contract(MyToken.abi, tokenAddress);
+      try{
 
+        let myContract = await new web3.eth.Contract(MyToken.abi, tokenAddress);
 
-      let estimatedGas = await myContract.methods.transfer(this.addrReceiver, this.amountTransfer).estimateGas();
+        let estimatedGas = await myContract.methods.transfer(this.addrReceiver, this.amountTransfer).estimateGas();
 
-      console.log("estimatedGas:",estimatedGas);
+        console.log("estimatedGas:",estimatedGas);
 
+        //gas代をcoinbaseから取得
+        let addrCoinbase =  await web3.eth.getCoinbase();
+        let valueEthWei = estimatedGas * 10000000000;
+        let addrSender = this.wallet.address;
 
-      //gas代をcoinbaseから取得
-      let valueEthWei = estimatedGas * 10000000000;
+        await web3.eth.personal.unlockAccount(addrCoinbase, coinbasePassword, 1000);
+        let result_eth = await web3.eth.sendTransaction({from: addrCoinbase, to: addrSender, value: valueEthWei});
 
-      await web3.eth.personal.unlockAccount(this.addrCoinbase, coinbasePassword, 1000);
-      let result_eth = await web3.eth.sendTransaction({from: this.addrCoinbase, to: this.addrSender, value: valueEthWei});
+        console.log("result_eth:", result_eth);
 
-      console.log("result_eth:", result_eth);
+        //XDS送金
 
-      //XDS送金
-      await web3.eth.personal.unlockAccount(this.addrSender, this.passwordSender, 1000);
-      let transfer = await myContract.methods.transfer(this.addrReceiver, this.amountTransfer)
-      .send({from: this.addrSender});
+        await web3.eth.personal.unlockAccount(addrSender, this.passwordSender, 1000);
+        let transfer = await myContract.methods.transfer(this.addrReceiver, this.amountTransfer)
+        .send({from: addrSender});
+
+        console.log("transfer:", transfer);
+
+      }catch(err){
+        alert("Error!")
+      }
     
-      console.log("transfer:", transfer);
-
       return;
     },
     async handleQRCodeReader(){
@@ -191,14 +166,15 @@ export default {
   },
 
   computed: {
-    // balance() {
-    //    return this.$store.state.wallet.amount
-    // },
-    // address(){
-    //    return this.$store.state.wallet.address
-    // }
     wallet: function(){
      return this.$store.state.wallet
+    },
+    config: function(){ //QRコード生成を動的に処理
+      return{
+        value: this.wallet.address, 
+        imagePath: "/XDS195.png",
+        filter: "color",
+      }
     }
   }
 

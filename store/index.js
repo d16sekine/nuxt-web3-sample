@@ -4,13 +4,16 @@ const walletStore = () => {
   return new Vuex.Store({
     state: () => ({
       wallet: {
-        amount:0,
+        balance:0,
         address:""
       }
     }),
+    getters:{
+      wallet:(state)=> state.wallet
+    },
     mutations: {
-      setAmountToStore(state, value) {
-        state.wallet.amount = value;
+      setBalanceToStore(state, value) {
+        state.wallet.balance = value;
       },
       setAddressToStore(state, value) {
         state.wallet.address = value;
