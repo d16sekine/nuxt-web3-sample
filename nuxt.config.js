@@ -27,6 +27,12 @@ module.exports = {
   //   middleware:["auth-cookie"]
   // },
 
+  env:{
+    wsGethUrl:"ws://192.168.10.5:8888",
+    addressXDSContract:"0x6dc9d424b5514f249c73093295917440a1614474",
+    coinbasePassword:""
+  },
+
   /*
   ** Build configuration
   */
@@ -54,12 +60,12 @@ module.exports = {
   css: [
     'element-ui/lib/theme-chalk/index.css'
   ],
-  modules: [
-    // Simple usage
-    'cookie-universal-nuxt',
+//   modules: [
+//     // Simple usage
+//     'cookie-universal-nuxt',
  
-    // With options
-    ['cookie-universal-nuxt', { alias: 'cookiz' }],
- ]
+//     // With options
+//     ['cookie-universal-nuxt', { alias: 'cookiz' }],
+//  ]
 }
 

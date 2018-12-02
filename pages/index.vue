@@ -18,15 +18,17 @@
 
 <script>
 import Web3 from 'web3'
-const web3 = new Web3('ws://192.168.10.5:8888');
+const web3 = new Web3("ws://192.168.10.5:8888");
 
 export default {
  
   async asyncData(context){
 
+    
     return {
       newPassword:""
     }
+
   },
 
   methods: {
@@ -40,16 +42,16 @@ export default {
 
       console.log("created address:",address);
 
-      if(confirm(address + 'をcookieに保存しますか？')){
+      if(confirm(address + 'をLocalStrageに保存しますか？')){
 
         window.localStorage.setItem('XDSaddress', address);
    
       }
       else{
 
-        alert('キャンセルされました'); // 警告ダイアログを表示
-
       }
+
+      alert('Addressとパスワードは安全に保管お願いします。')
 
       this.$router.push("/users/")
 
@@ -74,15 +76,6 @@ export default {
 }
 
 .title {
-  font-family: "Quicksand", "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* 1 */
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
-}
-
-.title {
   font-weight: 300;
   font-size: 42px;
   color: #526488;
@@ -90,8 +83,15 @@ export default {
   padding-bottom: 15px;
 }
 
-.links {
-  padding-top: 15px;
+.center {
+  text-align:center
 }
+
+.el-header, .el-footer {
+    background-color: #B3C0D1;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+  }
 </style>
 

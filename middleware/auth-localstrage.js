@@ -4,7 +4,7 @@ export default(context) => {
     //console.log("cookieRes:",cookieRes);
     
     let XDSaddress = window.localStorage.getItem('XDSaddress');
-    console.log("XDSaddress:", XDSaddress);
+    console.log("XDSaddress in local strage:", XDSaddress);
 
     if(!XDSaddress){
         context.redirect('/')

@@ -6,46 +6,28 @@
     <h2 class="title">XDS-Wallet-App</h2>
   </el-header>
   <el-main>
+    <p>Your XDS Address</p>
+    <el-input placeholder=""  v-model="wallet.address"></el-input>
+    <p>Your XDS Amount</p>
+    <p>{{wallet.balance}}</P>
+     <el-button @click="getAmount" type="primary">UPDATE Balance</el-button>
+    <hr />
+    <p>XDS amount</p>
+    <el-input v-model="amountTransfer" placeholder="Please input XDS Amount"></el-input>
+    <p>Receiver Address</p>
     <div>
-  <el-card class="box-card">
-  <h1 class="center">XDS Address</h1>
-  <el-input placeholder=""  v-model="wallet.address"></el-input>
-  <div id="qrGenarate" class="center"> 
+    <el-input v-model="addrReceiver" placeholder="Please input XDS Address"></el-input>
+    </div>
+    <p>Your Password</p>
+    <el-input v-model="passwordSender" placeholder="Please Your Password"></el-input>
+    <el-button @click="transferXDS" type="primary">SEND XDS</el-button> 
+    <div id="qrGenarate"> 
     <vue-q-art :config=config></vue-q-art>
   </div>
-  
-  </el-card>
-  <el-card class="box-card">
-    <div class="center"> 
-      <h1>XDS Amount</h1>
-    <h2>{{wallet.balance}}</h2>
-     <el-button @click="getAmount" class="center" type="primary">UPDATE Your Balance</el-button>
-    </div>
-  </el-card>
-  <el-card class="box-card">
-  <h1 class="center">Transfer XDS</h1>
-  <p>送金するXDS量</p>
-  <div class="center">
-    <!-- <el-input v-model="amountTransfer" placeholder="Please input XDS Amount"></el-input> -->
-    <el-input-number v-model="amountTransfer" @change="handleChange" :min="0" :max="100" :step="1"></el-input-number>
-    </div>
-  <p>Receiver Address</p>
-    <el-input v-model="addrReceiver" placeholder="Please input XDS Address"></el-input>
-  <p>Your Password</p>
-  <el-input v-model="passwordSender" placeholder="Please Your Password"></el-input>
-
-  <div class="center">
-  <el-button @click="transferXDS" type="primary" icon="el-icon-upload2">Transfer</el-button>
-      </div>
-  </el-card>
-  
-  <p>future works ...</P>
-
   <div class="qrReader">
     <qrcode-reader :paused="paused" @init="onInit" @decode="onDecode" v-if="!destroyed"></qrcode-reader>
   </div>
   <el-button @click="handleQRCodeReader" type="primary" disabled>{{textButtonQRCodeReader}}</el-button>
-  </div>
   </el-main>
   </el-container> 
      
@@ -58,7 +40,7 @@ import { QrcodeReader } from 'vue-qrcode-reader'
 
 const MyToken = require("~/static/token/MyToken.json")
 const tokenAddress = "0x6dc9d424b5514f249c73093295917440a1614474";
-const web3 = new Web3("ws://192.168.10.5:8888");
+const web3 = new Web3('ws://192.168.10.5:8888');
 
 export default {
 
@@ -69,7 +51,6 @@ export default {
     QrcodeReader
   },
 
-  //TODO: asynDataに統合
   data () {
       return {
         paused: false,
@@ -87,7 +68,7 @@ export default {
 
     return {
       addrReceiver: "",
-      amountTransfer: 0,
+      amountTransfer: 2,
       passwordSender: "",
       textButtonQRCodeReader:"QR Code Reader:ON",
     }
@@ -107,13 +88,12 @@ export default {
 
     async transferXDS(){
 
-      try{
+      let coinbasePassword = "";
 
-        let coinbasePassword = "";
+      try{
 
         let myContract = await new web3.eth.Contract(MyToken.abi, tokenAddress);
 
-        console.log(this.amountTransfer);
         let estimatedGas = await myContract.methods.transfer(this.addrReceiver, this.amountTransfer).estimateGas();
 
         console.log("estimatedGas:",estimatedGas);
@@ -137,7 +117,6 @@ export default {
         console.log("transfer:", transfer);
 
       }catch(err){
-        console.log(err);
         alert("Error!")
       }
     
@@ -185,10 +164,6 @@ export default {
         this.addrReceiver = decodeString
         //読み取ったらQRcode Readerを破棄する
         this.destroyed = true
-      },
-
-      handleChange(value) {
-        //console.log(value)
       }
   
   },
@@ -220,6 +195,15 @@ export default {
 }
 
 .title {
+  font-family: "Quicksand", "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* 1 */
+  display: block;
+  font-weight: 300;
+  font-size: 100px;
+  color: #35495e;
+  letter-spacing: 1px;
+}
+
+.title {
   font-weight: 300;
   font-size: 42px;
   color: #526488;
@@ -227,24 +211,8 @@ export default {
   padding-bottom: 15px;
 }
 
-.center {
-  text-align:center
+.links {
+  padding-top: 15px;
 }
-
-.margin {
-  margin:10px　0px　10px　0px
-}
-
-.el-header, .el-footer {
-    background-color: #B3C0D1;
-    color: #333;
-    text-align: center;
-    line-height: 60px;
-  }
-
-.el-main {
-    width: 100%;
-    margin:auto;
-  }
 </style>
 
