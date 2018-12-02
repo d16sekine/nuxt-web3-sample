@@ -29,6 +29,9 @@
     <div id="qrGenarate"> 
     <vue-q-art :config=config></vue-q-art>
   </div>
+  <div class="qrReader">
+    <qrcode-reader :paused="paused" @init="onInit" @decode="onDecode"></qrcode-reader>
+  </div>
   </el-main>
   </el-container> 
      
@@ -37,9 +40,8 @@
 <script>
 import Web3 from 'web3'
 import VueQArt from 'vue-qart'
-// if (process.browser) {
-//   require('vue-qart')
-// }
+import { QrcodeReader } from 'vue-qrcode-reader'
+
 const MyToken = require("~/static/token/MyToken.json")
 const tokenAddress = "0x6dc9d424b5514f249c73093295917440a1614474";
 const web3 = new Web3('http://localhost:8545');
@@ -47,17 +49,32 @@ const web3 = new Web3('http://localhost:8545');
 export default {
 
   components: {
-    VueQArt
+    VueQArt,
+    QrcodeReader
   },
+
+  data () {
+      return {
+        paused: false
+      }
+    },
    
   async asyncData(context){
 
     //coinbase
-    let addrCoinbase =  await web3.eth.getCoinbase();
+    let addrCoinbase = "";
+    let totalSupply = 0;
     
     //token info
     let myContract =  await new web3.eth.Contract(MyToken.abi, tokenAddress);
-    let totalSupply = await myContract.methods.totalSupply().call();
+
+    try{
+      addrCoinbase =  await web3.eth.getCoinbase();
+      totalSupply = await myContract.methods.totalSupply().call();
+    }catch(err){
+      console.log("err:", err);
+    }
+     
     //console.log("totalSupply:", totalSupply);
 
     let yourAddress = "0x1ac995f1e67ce3b0b66064b24669b26124db7e1e";
@@ -75,7 +92,7 @@ export default {
       config: {
         // valueにはinput v-modelにて動的に入力した値が設定されるため空文字を設定
         value: yourAddress, 
-        imagePath: "~/assets/XDS195.png",
+        imagePath: "/XDS195.png",
         filter: "color",
       }
     }
@@ -126,7 +143,35 @@ export default {
 
       
       return;
-    }   
+    },
+
+    async onInit (promise) {
+        // show loading indicator
+        try {
+          await promise
+          // successfully initialized
+        } catch (error) {
+          if (error.name === 'NotAllowedError') {
+            // user denied camera access permisson
+          } else if (error.name === 'NotFoundError') {
+            // no suitable camera device installed
+          } else if (error.name === 'NotSupportedError') {
+            // page is not served over HTTPS (or localhost)
+          } else if (error.name === 'NotReadableError') {
+            // maybe camera is already in use
+          } else if (error.name === 'OverconstrainedError') {
+            // passed constraints don't match any camera. Did you requested the front camera although there is none?
+          } else {
+            // browser is probably lacking features (WebRTC, Canvas)
+          }
+        } finally {
+          // hide loading indicator
+        }
+      },
+      onDecode(content){
+        this.paused = true
+        alert(content)
+      }
   
   },
 
