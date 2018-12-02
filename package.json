@@ -15,6 +15,8 @@
   "dependencies": {
     "element-ui": "^2.4.11",
     "nuxt": "^2.0.0",
+    "vue-qart": "^2.2.0",
+    "vue-qr": "^1.5.2",
     "web3": "^1.0.0-beta.36"
   },
   "devDependencies": {
