@@ -46,9 +46,10 @@ export default {
 
         console.log(cookieValObject);
 
-        this.$cookies.set('XDSInfo', cookieValObject, {
+        await this.$cookies.set('XDSInfo', cookieValObject, {
           path: '/',
-          maxAge: 60 * 60 * 24 * 365
+          maxAge: 60 * 60 * 24 * 365,
+          domain: location.origin
         })
 
       }
