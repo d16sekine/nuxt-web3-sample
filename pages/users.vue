@@ -40,7 +40,7 @@ import { QrcodeReader } from 'vue-qrcode-reader'
 
 const MyToken = require("~/static/token/MyToken.json")
 const tokenAddress = "0x6dc9d424b5514f249c73093295917440a1614474";
-const web3 = new Web3('ws://127.0.0.1:8888');
+const web3 = new Web3('ws://192.168.10.5:8888');
 
 export default {
 
@@ -120,6 +120,7 @@ export default {
     
       return;
     },
+
     async handleQRCodeReader(){
       if(this.destroyed){
         this.destroyed = false
