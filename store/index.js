@@ -11,6 +11,9 @@ const walletStore = () => {
     mutations: {
       setAmountToStore(state, value) {
         state.wallet.amount = value;
+      },
+      setAddressToStore(state, value) {
+        state.wallet.address = value;
       }
     },
     // actions: {

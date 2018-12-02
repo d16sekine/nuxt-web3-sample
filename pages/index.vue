@@ -13,7 +13,7 @@
     {{totalSupply}} XDS
     <hr />
     <p>Your XDS Address</p>
-    <el-input v-model="targetAddress" placeholder="Please input XDS Address"></el-input>
+    <p>{{address}}</P>
     <el-button @click="createQRCode" type="primary">QRコード</el-button> 
     <p>{{balance}}</P>
      <el-button @click="getAmount" type="primary">GET XDS Balance</el-button>
@@ -28,7 +28,6 @@
     <el-button @click="transferXDS" type="primary">SEND XDS</el-button> 
     <div id="qrGenarate"> 
     <vue-q-art :config=config></vue-q-art>
-    QR読み取り内容設定: <input v-model="config.value" style="width:200px">
   </div>
   </el-main>
   </el-container> 
@@ -38,29 +37,20 @@
 <script>
 import Web3 from 'web3'
 import VueQArt from 'vue-qart'
-if (process.browser) {
-  require('vue-qart')
-}
+// if (process.browser) {
+//   require('vue-qart')
+// }
 const MyToken = require("~/static/token/MyToken.json")
 const tokenAddress = "0x6dc9d424b5514f249c73093295917440a1614474";
 const web3 = new Web3('http://localhost:8545');
 
 export default {
+
   components: {
     VueQArt
   },
-  data() {
-    return {
-      config: {
-        // valueにはinput v-modelにて動的に入力した値が設定されるため空文字を設定
-        value: "", 
-        imagePath: "~/assets/XDS.png",
-        filter: "color",
-      }
-    };
-  },
    
-  async asyncData(){
+  async asyncData(context){
 
     //coinbase
     let addrCoinbase =  await web3.eth.getCoinbase();
@@ -70,25 +60,29 @@ export default {
     let totalSupply = await myContract.methods.totalSupply().call();
     //console.log("totalSupply:", totalSupply);
 
+    let yourAddress = "0x1ac995f1e67ce3b0b66064b24669b26124db7e1e";
+
+    context.store.commit('setAddressToStore', yourAddress);
+
     return {
       addrCoinbase: addrCoinbase,
       tokenContract: tokenAddress,
       totalSupply: totalSupply,
       addrSender: addrCoinbase,
-      addrReceiver: "0xa4a717ab24c148428180ae28a8947802c6ddfe71", //一時的に
+      addrReceiver: "",
       amountTransfer: 2,
       passwordSender: "",
-      targetAddress: "",
+      config: {
+        // valueにはinput v-modelにて動的に入力した値が設定されるため空文字を設定
+        value: yourAddress, 
+        imagePath: "~/assets/XDS195.png",
+        filter: "color",
+      }
     }
   },
 
   methods: {
     async getAmount(){
-
-      if(this.targetAddress == ""){
-        alert("XDSアドレスを入力してください！");
-        return;
-      }
 
       let myContract =  await new web3.eth.Contract(MyToken.abi, tokenAddress);
       console.log("targetAddress:", this.targetAddress);
@@ -119,7 +113,7 @@ export default {
 
       console.log("result_eth:", result_eth);
 
-
+      //XDS送金
       await web3.eth.personal.unlockAccount(this.addrSender, this.passwordSender, 1000);
       let transfer = await myContract.methods.transfer(this.addrReceiver, this.amountTransfer)
       .send({from: this.addrSender});
@@ -139,6 +133,9 @@ export default {
   computed: {
     balance() {
        return this.$store.state.wallet.amount
+    },
+    address(){
+       return this.$store.state.wallet.address
     }
   }
 
