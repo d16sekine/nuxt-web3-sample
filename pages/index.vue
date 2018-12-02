@@ -6,34 +6,11 @@
     <h2 class="title">XDS-Wallet-App</h2>
   </el-header>
   <el-main>
-    <p>Token Contract Address</p>
-    <el-input placeholder=""  v-model="tokenContract"  :disabled="true"></el-input>
-    <hr />
-    <p>Total supply</p>
-    {{totalSupply}} XDS
-    <hr />
-    <p>Your XDS Address</p>
-    <p>{{wallet.address}}</P>
-    <p>Your XDS Amount</p>
-    <p>{{wallet.balance}}</P>
-     <el-button @click="getAmount" type="primary">GET XDS Balance</el-button>
-    <hr />
-    <p>XDS amount</p>
-    <el-input v-model="amountTransfer" placeholder="Please input XDS Amount"></el-input>
-    <p>Receiver Address</p>
-    <div>
-    <el-input v-model="addrReceiver" placeholder="Please input XDS Address"></el-input>
-    <el-button @click="handleQRCodeReader" type="primary">{{textButtonQRCodeReader}}</el-button>
-    </div>
-    <p>Your Password</p>
-    <el-input v-model="passwordSender" placeholder="Please Your Password"></el-input>
-    <el-button @click="transferXDS" type="primary">SEND XDS</el-button> 
-    <div id="qrGenarate"> 
-    <vue-q-art :config=config></vue-q-art>
-  </div>
-  <div class="qrReader">
-    <qrcode-reader :paused="paused" @init="onInit" @decode="onDecode" v-if="!destroyed"></qrcode-reader>
-  </div>
+
+    <p>Create New XDS Address</p>
+    <el-input placeholder="Please input Password"  v-model="newPassword"></el-input>
+    <el-button @click="createNewAddress" type="primary">Address作成</el-button>
+ 
   </el-main>
   </el-container> 
      
@@ -41,163 +18,40 @@
 
 <script>
 import Web3 from 'web3'
-import VueQArt from 'vue-qart'
-import { QrcodeReader } from 'vue-qrcode-reader'
-
-const MyToken = require("~/static/token/MyToken.json")
-const tokenAddress = "0x6dc9d424b5514f249c73093295917440a1614474";
 const web3 = new Web3('ws://127.0.0.1:8888');
 
 export default {
-
-  components: {
-    VueQArt,
-    QrcodeReader
-  },
-
-  data () {
-      return {
-        paused: false,
-        destroyed: true
-      }
-    },
-   
+ 
   async asyncData(context){
 
-    //coinbase
-    let addrCoinbase = "";
-    let totalSupply = 0;
-    
-    //token info
-    let myContract =  await new web3.eth.Contract(MyToken.abi, tokenAddress);
-
-    try{
-      addrCoinbase =  await web3.eth.getCoinbase();
-      totalSupply = await myContract.methods.totalSupply().call();
-    }catch(err){
-      console.log("err:", err);
-    }
-     
-    //console.log("totalSupply:", totalSupply);
-
-    let yourAddress = "0x1ac995f1e67ce3b0b66064b24669b26124db7e1e";
-
-    context.store.commit('setAddressToStore', yourAddress);
+    //cockieの有無の処理
 
     return {
-      addrCoinbase: addrCoinbase,
-      tokenContract: tokenAddress,
-      totalSupply: totalSupply,
-      addrSender: addrCoinbase,
-      addrReceiver: "",
-      amountTransfer: 2,
-      passwordSender: "",
-      textButtonQRCodeReader:"QR Code Reader:ON",
-      config: {
-        // valueにはinput v-modelにて動的に入力した値が設定されるため空文字を設定
-        value: yourAddress, 
-        imagePath: "/XDS195.png",
-        filter: "color",
-      }
+      newPassword:""
     }
   },
 
   methods: {
-    async getAmount(){
 
-      let myContract =  await new web3.eth.Contract(MyToken.abi, tokenAddress);
-      console.log("targetAddress:", this.address);
-      let balanceXDS = await myContract.methods.balanceOf(this.address).call();
-      let balanceETH = await web3.eth.getBalance(this.address);
-      console.log("balance of XDS:", balanceXDS);
-      console.log("balance of ETH:", balanceETH);
-      this.$store.commit('setAmountToStore', balanceXDS);
-    },
+    async createNewAddress(){
 
-    async transferXDS(){
+      console.log(this.newPassword);
 
-      let coinbasePassword = "";
+      let address = "asdf";
 
-      let myContract =  await new web3.eth.Contract(MyToken.abi, tokenAddress);
+      //address =  await web3.eth.personal.newAccount(this.newPassword);
 
+      console.log("address:",address);
 
-      let estimatedGas = await myContract.methods.transfer(this.addrReceiver, this.amountTransfer).estimateGas();
+      confirm(address);
 
-      console.log("estimatedGas:",estimatedGas);
-
-
-      //gas代をcoinbaseから取得
-      let valueEthWei = estimatedGas * 10000000000;
-
-      await web3.eth.personal.unlockAccount(this.addrCoinbase, coinbasePassword, 1000);
-      let result_eth = await web3.eth.sendTransaction({from: this.addrCoinbase, to: this.addrSender, value: valueEthWei});
-
-      console.log("result_eth:", result_eth);
-
-      //XDS送金
-      await web3.eth.personal.unlockAccount(this.addrSender, this.passwordSender, 1000);
-      let transfer = await myContract.methods.transfer(this.addrReceiver, this.amountTransfer)
-      .send({from: this.addrSender});
-    
-      console.log("transfer:", transfer);
-
+      this.$router.push("/users/")
+      
       return;
-    },
-    async handleQRCodeReader(){
-      if(this.destroyed){
-        this.destroyed = false
-        this.textButtonQRCodeReader = "QR Code Reader:OFF"
-      }else{
-        this.destroyed =  true
-        this.textButtonQRCodeReader = "QR Code Reader:ON"
-      }
 
-      return;
-    },
-    
-    async onInit (promise) {
-        // show loading indicator
-        try {
-          await promise
-          // successfully initialized
-        } catch (error) {
-          if (error.name === 'NotAllowedError') {
-            // user denied camera access permisson
-          } else if (error.name === 'NotFoundError') {
-            // no suitable camera device installed
-          } else if (error.name === 'NotSupportedError') {
-            // page is not served over HTTPS (or localhost)
-          } else if (error.name === 'NotReadableError') {
-            // maybe camera is already in use
-          } else if (error.name === 'OverconstrainedError') {
-            // passed constraints don't match any camera. Did you requested the front camera although there is none?
-          } else {
-            // browser is probably lacking features (WebRTC, Canvas)
-          }
-        } finally {
-          // hide loading indicator
-        }
-      },
-      onDecode(decodeString){
-        this.paused = true
-        alert(decodeString)
-        this.addrReceiver = decodeString
-        //読み取ったらQRcode Readerを破棄する
-        this.destroyed = true
-      }
-  
-  },
-
-  computed: {
-    // balance() {
-    //    return this.$store.state.wallet.amount
-    // },
-    // address(){
-    //    return this.$store.state.wallet.address
-    // }
-    wallet: function(){
-     return this.$store.state.wallet
     }
+
+  
   }
 
 
