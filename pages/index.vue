@@ -33,7 +33,7 @@ export default {
 
     async createNewAddress(){
 
-      console.log("inputed password:",this.newPassword);
+      console.log("inputted password:",this.newPassword);
 
       let address =  await web3.eth.personal.newAccount(this.newPassword);
       //let address = "test";
@@ -42,16 +42,8 @@ export default {
 
       if(confirm(address + 'をcookieに保存しますか？')){
 
-        const cookieValObject = { address: address }
-
-        console.log(cookieValObject);
-
-        await this.$cookies.set('XDSInfo', cookieValObject, {
-          path: '/',
-          maxAge: 60 * 60 * 24 * 365,
-          domain: location.origin
-        })
-
+        window.localStorage.setItem('XDSaddress', address);
+   
       }
       else{
 

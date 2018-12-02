@@ -1,16 +1,15 @@
 export default(context) => {
 
-    const cookieRes = context.app.$cookies.get('XDSInfo')
+    //const cookieRes = context.app.$cookies.get('XDSInfo')
+    //console.log("cookieRes:",cookieRes);
+    
+    let XDSaddress = window.localStorage.getItem('XDSaddress');
+    console.log("XDSaddress:", XDSaddress);
 
-    console.log("cookieRes:",cookieRes);
-
-    if(!cookieRes){
+    if(!XDSaddress){
         context.redirect('/')
-    }
-
-    if(cookieRes.address){
-        
-        context.store.commit("setAddressToStore", cookieRes.address)
+    }else{
+        context.store.commit("setAddressToStore", XDSaddress)
     }
 
 }
