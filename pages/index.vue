@@ -44,7 +44,7 @@ import { QrcodeReader } from 'vue-qrcode-reader'
 
 const MyToken = require("~/static/token/MyToken.json")
 const tokenAddress = "0x6dc9d424b5514f249c73093295917440a1614474";
-const web3 = new Web3('http://localhost:8545');
+const web3 = new Web3('ws://127.0.0.1:8888');
 
 export default {
 
@@ -102,9 +102,9 @@ export default {
     async getAmount(){
 
       let myContract =  await new web3.eth.Contract(MyToken.abi, tokenAddress);
-      console.log("targetAddress:", this.targetAddress);
-      let balanceXDS = await myContract.methods.balanceOf(this.targetAddress).call();
-      let balanceETH = await web3.eth.getBalance(this.targetAddress);
+      console.log("targetAddress:", this.address);
+      let balanceXDS = await myContract.methods.balanceOf(this.address).call();
+      let balanceETH = await web3.eth.getBalance(this.address);
       console.log("balance of XDS:", balanceXDS);
       console.log("balance of ETH:", balanceETH);
       this.$store.commit('setAmountToStore', balanceXDS);
