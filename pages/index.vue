@@ -18,7 +18,9 @@
 
 <script>
 import Web3 from 'web3'
-const web3 = new Web3("ws://192.168.10.5:8888");
+
+const urlWs= "ws://" + location.hostname + ":8888"
+const web3 = new Web3(urlWs);
 
 export default {
  
