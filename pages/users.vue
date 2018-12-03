@@ -38,7 +38,8 @@
   <el-button @click="transferXDS" type="primary" icon="el-icon-upload2">Transfer</el-button>
       </div>
   </el-card>
-  
+  <QrcodeForReceive />
+  <QrcodeForAddress />
   <p>future works ...</P>
 
   <div class="qrReader">
@@ -55,6 +56,8 @@
 import Web3 from 'web3'
 import VueQArt from 'vue-qart'
 import { QrcodeReader } from 'vue-qrcode-reader'
+import QrcodeForReceive from '~/components/QrcodeForReceive'
+import QrcodeForAddress from '~/components/QrcodeForAddress'
 
 const MyToken = require("~/static/token/MyToken.json")
 const tokenAddress = "0x6dc9d424b5514f249c73093295917440a1614474";
@@ -69,11 +72,14 @@ export default {
 
   components: {
     VueQArt,
-    QrcodeReader
+    QrcodeReader,
+    QrcodeForReceive,
+    QrcodeForAddress
   },
 
   //TODO: asynDataに統合
   data () {
+
       return {
         paused: false,
         destroyed: true
