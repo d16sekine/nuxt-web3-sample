@@ -120,6 +120,14 @@ export default {
 
         let coinbasePassword = "";
 
+        //Loadingの表示
+        const loading = this.$loading({
+                  lock: true,
+                  text: 'Pending Transaction...',
+                  spinner: 'el-icon-loading',
+                  background: 'rgba(0, 0, 0, 0.7)'
+        });
+
         let myContract = await new web3.eth.Contract(MyToken.abi, tokenAddress);
 
         console.log(this.amountTransfer);
@@ -138,11 +146,12 @@ export default {
         console.log("result_eth:", result_eth);
 
         //XDS送金
-
         await web3.eth.personal.unlockAccount(addrSender, this.passwordSender, 1000);
         let transfer = await myContract.methods.transfer(this.addrReceiver, this.amountTransfer)
         .send({from: addrSender});
 
+        //Loadingの解除
+        loading.close()
         console.log("transfer:", transfer);
 
       }catch(err){
